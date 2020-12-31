@@ -4,6 +4,7 @@ import requests
 import functools
 import json
 import os
+# Pickle模块实现了基本的数据序列与反序列化
 import pickle
 
 from lxml import etree
@@ -28,16 +29,20 @@ class SpiderSession:
     """
     def __init__(self):
         self.cookies_dir_path = "./cookies/"
+        # 读取ini 配置中的config 下的 DEFAULT_USER_AGENT(用户代理)
         self.user_agent = global_config.getRaw('config', 'DEFAULT_USER_AGENT')
 
         self.session = self._init_session()
 
     def _init_session(self):
+        # 发送一个请求，用于设置请求中的cookies
+        # 维持会话,可以让我们在跨请求时保存某些参数
         session = requests.session()
         session.headers = self.get_headers()
         return session
 
     def get_headers(self):
+        # 拼接 head  DEFAULT_USER_AGENT(用户代理)
         return {"User-Agent": self.user_agent,
                 "Accept": "text/html,application/xhtml+xml,application/xml;"
                           "q=0.9,image/webp,image/apng,*/*;"
@@ -80,6 +85,7 @@ class SpiderSession:
         if cookies_file == '':
             return False
         with open(cookies_file, 'rb') as f:
+            # 反序列化对象，将文件中的数据解析为一个python对象
             local_cookies = pickle.load(f)
         self.set_cookies(local_cookies)
 
@@ -94,6 +100,7 @@ class SpiderSession:
         if not os.path.exists(directory):
             os.makedirs(directory)
         with open(cookies_file, 'wb') as f:
+            # 序列化对象，将对象obj保存到文件file中去
             pickle.dump(self.get_cookies(), f)
 
 
